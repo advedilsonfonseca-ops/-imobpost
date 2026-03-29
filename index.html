@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ff6b2b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ImobPost AI">
+<meta name="description" content="Marketing imobiliário com inteligência artificial">
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- Apple Touch Icons -->
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-startup-image" href="icon-512.png">
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+
+<title>ImobPost AI</title>
+
+<style>
+:root {
+  --bg: #090c13;
+  --surface: #10141f;
+  --surface2: #161b2b;
+  --border: rgba(255,255,255,0.07);
+  --accent: #ff6b2b;
+  --accent2: #ff9a5e;
+  --blue: #3b82f6;
+  --text: #e8eaf0;
+  --muted: #6b7280;
+  --success: #22c55e;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100dvh;}
+::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:3px;}
+
+/* PWA install banner */
+#install-banner{position:fixed;bottom:calc(16px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface);border:1px solid rgba(255,107,43,.3);border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:12px;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.5);transition:transform .4s cubic-bezier(.16,1,.3,1);width:calc(100% - 32px);max-width:400px;}
+#install-banner.show{transform:translateX(-50%) translateY(0);}
+#install-banner .logo{width:40px;height:40px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:#fff;flex-shrink:0;}
+#install-banner .text{flex:1;}
+#install-banner .text b{display:block;font-size:13.5px;font-weight:600;}
+#install-banner .text span{font-size:12px;color:var(--muted);}
+#install-banner .btns{display:flex;gap:8px;flex-shrink:0;}
+#install-banner button{padding:7px 14px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;font-weight:500;}
+#install-banner .btn-install{background:var(--accent);color:#fff;}
+#install-banner .btn-dismiss{background:var(--surface2);color:var(--muted);}
+
+/* Offline badge */
+#offline-badge{position:fixed;top:calc(8px + var(--safe-top));left:50%;transform:translateX(-50%);background:#1a1a2e;border:1px solid rgba(245,158,11,.3);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--warn);z-index:998;display:none;align-items:center;gap:6px;}
+#offline-badge.show{display:flex;}
+
+/* App shell */
+#app{display:flex;flex-direction:column;height:100dvh;padding-top:var(--safe-top);}
+
+/* Topbar */
+#topbar{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;}
+#topbar .logo-mark{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:11px;color:#fff;}
+#topbar .page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;flex:1;}
+#topbar .user-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 10px 4px 4px;cursor:pointer;}
+#topbar .user-chip .av{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;}
+#topbar .user-chip span{font-size:12px;color:var(--muted);}
+
+/* Content area */
+#content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+
+/* Bottom nav */
+#bottom-nav{height:calc(56px + var(--safe-bottom));background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:flex-start;padding-top:6px;flex-shrink:0;}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 2px;cursor:pointer;border:none;background:none;transition:all .15s;}
+.nav-tab .icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
+.nav-tab .icon svg{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:1.8;transition:stroke .15s;}
+.nav-tab .label{font-size:10px;color:var(--muted);font-family:'DM Sans',sans-serif;transition:color .15s;}
+.nav-tab.active .icon svg{stroke:var(--accent);}
+.nav-tab.active .label{color:var(--accent);font-weight:600;}
+.nav-tab.admin-tab .icon svg{stroke:var(--warn);}
+.nav-tab.admin-tab .label{color:var(--warn);}
+.nav-tab.admin-tab.active .icon svg{stroke:var(--warn);}
+
+/* Pages */
+.page{display:none;padding:16px;animation:fadeUp .25s ease both;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;}
+.card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:12px;}
+
+/* Metric grid */
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.metric-val{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;line-height:1;}
+.metric-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.metric-delta{font-size:11.5px;color:var(--success);margin-top:5px;}
+
+/* Section header */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sec-title{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;}
+.sec-sub{font-size:12.5px;color:var(--muted);margin-top:2px;}
+
+/* Btn */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-full{width:100%;justify-content:center;padding:12px;}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,.12);color:var(--success);}
+.badge-orange{background:rgba(255,107,43,.12);color:var(--accent);}
+.badge-blue{background:rgba(59,130,246,.12);color:#60a5fa;}
+.badge-gray{background:rgba(107,114,128,.12);color:var(--muted);}
+
+/* Property card */
+.prop-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;}
+.prop-img{width:100%;height:140px;object-fit:cover;background:linear-gradient(135deg,#141928,#1b2136);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;}
+.prop-body{padding:14px;}
+.prop-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:2px;}
+.prop-sub{font-size:12px;color:var(--muted);margin-bottom:10px;}
+.prop-price{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;color:var(--accent);}
+
+/* Form */
+.form-group{margin-bottom:12px;}
+.form-group label{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-bottom:5px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);}
+.form-group textarea{resize:none;min-height:80px;line-height:1.5;}
+select option{background:var(--surface2);}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* Platform selector */
+.platform-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.platform-btn{padding:10px 6px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted);transition:all .15s;}
+.platform-btn.sel{border-color:var(--accent);background:rgba(255,107,43,.08);color:var(--accent);}
+
+/* Tone grid */
+.tone-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px;}
+.tone-btn{padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:12px;color:var(--muted);text-align:center;transition:all .15s;}
+.tone-btn.sel{border-color:var(--blue);background:rgba(59,130,246,.08);color:#60a5fa;}
+
+/* Post output */
+.post-output{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;min-height:120px;font-size:13.5px;line-height:1.7;color:var(--muted);font-style:italic;white-space:pre-wrap;}
+.post-output.filled{color:var(--text);font-style:normal;}
+.loading-dots{display:flex;gap:5px;padding:12px 0;}
+.loading-dots span{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:bounce .8s ease-in-out infinite;}
+.loading-dots span:nth-child(2){animation-delay:.16s;}
+.loading-dots span:nth-child(3){animation-delay:.32s;}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}}
+
+/* Leads table */
+.lead-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.lead-item:last-child{border-bottom:none;}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
+
+/* Notif */
+#notif{position:fixed;bottom:calc(72px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(60px);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:13px;z-index:500;display:flex;align-items:center;gap:8px;box-shadow:0 8px 28px rgba(0,0,0,.4);opacity:0;transition:all .3s;white-space:nowrap;}
+#notif.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(5px);z-index:200;display:none;align-items:flex-end;justify-content:center;padding-bottom:var(--safe-bottom);}
+.modal-overlay.open{display:flex;}
+.modal-sheet{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-height:88dvh;overflow-y:auto;padding:20px 16px calc(16px + var(--safe-bottom));animation:slideSheet .3s cubic-bezier(.16,1,.3,1);}
+@keyframes slideSheet{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
+.modal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:18px;}
+
+/* Auth screen */
+#auth-screen{position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;padding-top:calc(24px + var(--safe-top));}
+.auth-logo{width:60px;height:60px;background:var(--accent);border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:#fff;margin:0 auto 16px;}
+.auth-title{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;text-align:center;margin-bottom:6px;}
+.auth-sub{font-size:14px;color:var(--muted);text-align:center;margin-bottom:32px;}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;width:100%;max-width:400px;}
+.auth-toggle{text-align:center;margin-top:18px;font-size:13.5px;color:var(--muted);}
+.auth-toggle a{color:var(--accent);cursor:pointer;font-weight:500;}
+.err-msg{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--danger);margin-bottom:10px;}
+
+/* Landing */
+#landing-screen{position:fixed;inset:0;background:var(--bg);z-index:290;overflow-y:auto;padding-top:var(--safe-top);}
+.landing-hero{text-align:center;padding:60px 20px 40px;}
+.landing-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,43,.1);border:1px solid rgba(255,107,43,.25);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--accent);margin-bottom:20px;font-weight:500;}
+.landing-h1{font-family:'Syne',sans-serif;font-weight:800;font-size:32px;line-height:1.15;margin-bottom:14px;}
+.landing-p{font-size:15px;color:var(--muted);line-height:1.7;margin-bottom:28px;}
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 20px;}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.feature-icon{font-size:24px;margin-bottom:8px;}
+.feature-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:4px;}
+.feature-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+.plans-section{padding:20px 16px 40px;}
+.plan-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:10px;}
+.plan-card.highlight{border-color:rgba(255,107,43,.4);background:rgba(255,107,43,.03);}
+.plan-name{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;}
+.plan-price{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:var(--accent);margin:4px 0 12px;}
+.plan-features{font-size:12.5px;color:var(--muted);line-height:1.9;}
+
+/* Owner badge */
+.owner-badge{background:rgba(245,158,11,.1);color:var(--warn);border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700;letter-spacing:.5px;}
+
+/* Toggle */
+.toggle{position:relative;width:38px;height:22px;cursor:pointer;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--surface2);border-radius:11px;border:1px solid var(--border);transition:.2s;}
+.toggle-slider:before{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:var(--muted);top:2px;left:2px;transition:.2s;}
+.toggle input:checked+.toggle-slider{background:rgba(255,107,43,.2);border-color:var(--accent);}
+.toggle input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--accent);}
+
+/* Scrollable content safe area */
+.page-pad-bottom{height:calc(20px + var(--safe-bottom));}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading" style="position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+  <div style="width:56px;height:56px;background:var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:#fff;">IP</div>
+  <div style="display:flex;gap:5px;">
+    <div style="width:6px;height:6px;border-radius:50%;background:var(--accent);animation:bounce .8s ease-in-out infinite;"></div>
+    <div style="width:6px;height:6px;border-radius:50%;background:var(--accent);animation:bounce .8s ease-in-out .16s infinite;"></div>
+    <div style="width:6px;height:6px;border-radius:50%;background:var(--accent);animation:bounce .8s ease-in-out .32s infinite;"></div>
+  </div>
+</div>
+
+<!-- OFFLINE BADGE -->
+<div id="offline-badge">📡 Sem conexão</div>
+
+<!-- LANDING -->
+<div id="landing-screen" style="display:none;">
+  <div class="landing-hero">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 4px;margin-bottom:32px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:30px;height:30px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;color:#fff;">IP</div>
+        <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">Imob<span style="color:var(--accent);">Post</span> AI</span>
+      </div>
+      <button class="btn btn-secondary" onclick="showAuth()" style="padding:7px 14px;font-size:12.5px;">Entrar</button>
+    </div>
+    <div class="landing-badge">✨ Powered by Claude AI</div>
+    <h1 class="landing-h1">Posts imobiliários<br><span style="color:var(--accent);">gerados por IA</span><br>em segundos</h1>
+    <p class="landing-p">Crie legendas irresistíveis para seus imóveis. Foque em vender. A IA cuida do marketing.</p>
+    <button class="btn btn-primary btn-full" onclick="showAuth()" style="max-width:320px;font-size:15px;padding:14px;">Começar agora →</button>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">IA Real</div><div class="feature-desc">Legendas criadas pelo Claude AI, otimizadas por plataforma</div></div>
+    <div class="feature-card"><div class="feature-icon">🏠</div><div class="feature-title">Gestão</div><div class="feature-desc">Cadastre e gerencie todos os seus imóveis com fotos</div></div>
+    <div class="feature-card"><div class="feature-icon">📱</div><div class="feature-title">Multi-canal</div><div class="feature-desc">Instagram, Facebook, WhatsApp e LinkedIn</div></div>
+    <div class="feature-card"><div class="feature-icon">👥</div><div class="feature-title">CRM</div><div class="feature-desc">Capture e acompanhe seus leads até o fechamento</div></div>
+  </div>
+  <div class="plans-section">
+    <div style="text-align:center;margin-bottom:20px;"><h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:22px;">Planos</h2></div>
+    <div class="plan-card"><div class="plan-name">Starter</div><div class="plan-price">R$ 47<span style="font-size:14px;font-weight:400;color:var(--muted);">/mês</span></div><div class="plan-features">✓ 10 imóveis &nbsp;·&nbsp; ✓ 50 posts/mês<br>✓ Instagram & WhatsApp</div><button class="btn btn-secondary btn-full" style="margin-top:14px;" onclick="showAuth()">Começar</button></div>
+    <div class="plan-card highlight" style="position:relative;"><div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;border-radius:20px;padding:2px 12px;font-size:11px;font-weight:600;white-space:nowrap;">Mais Popular</div><div class="plan-name">Pro</div><div class="plan-price">R$ 97<span style="font-size:14px;font-weight:400;color:var(--muted);">/mês</span></div><div class="plan-features">✓ 50 imóveis &nbsp;·&nbsp; ✓ Posts ilimitados<br>✓ Todas as plataformas &nbsp;·&nbsp; ✓ Upload fotos</div><button class="btn btn-primary btn-full" style="margin-top:14px;" onclick="showAuth()">Começar</button></div>
+    <div class="plan-card"><div class="plan-name">Imobiliária</div><div class="plan-price">R$ 247<span style="font-size:14px;font-weight:400;color:var(--muted);">/mês</span></div><div class="plan-features">✓ Imóveis ilimitados &nbsp;·&nbsp; ✓ Multi-usuários<br>✓ Relatórios avançados &nbsp;·&nbsp; ✓ API</div><button class="btn btn-secondary btn-full" style="margin-top:14px;" onclick="showAuth()">Começar</button></div>
+  </div>
+</div>
+
+<!-- AUTH -->
+<div id="auth-screen" style="display:none;">
+  <div class="auth-logo">IP</div>
+  <div class="auth-title">Imob<span style="color:var(--accent);">Post</span> AI</div>
+  <div class="auth-sub" id="auth-sub">Acesse sua conta</div>
+  <div class="auth-card">
+    <div id="auth-err" class="err-msg" style="display:none;"></div>
+    <div id="auth-name-group" class="form-group" style="display:none;">
+      <label>Nome completo</label>
+      <input type="text" id="auth-name" placeholder="Seu nome">
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="seu@email.com">
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="auth-pass" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter')submitAuth()">
+    </div>
+    <button class="btn btn-primary btn-full" id="auth-btn" onclick="submitAuth()">Entrar</button>
+  </div>
+  <div class="auth-toggle">
+    <span id="auth-toggle-text">Não tem conta?</span>
+    <a onclick="toggleAuthMode()"> <span id="auth-toggle-link">Cadastre-se</span></a>
+  </div>
+  <button onclick="document.getElementById('landing-screen').style.display='block';document.getElementById('auth-screen').style.display='none';" style="margin-top:16px;background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">← Voltar</button>
+</div>
+
+<!-- APP SHELL -->
+<div id="app" style="display:none;">
+  <!-- Offline -->
+  <div id="offline-badge">📡 Sem conexão</div>
+
+  <!-- Topbar -->
+  <div id="topbar">
+    <div class="logo-mark">IP</div>
+    <div class="page-title" id="topbar-title">Dashboard</div>
+    <div class="user-chip" id="user-chip" onclick="navTo('settings')">
+      <div class="av" id="user-av">?</div>
+      <span id="user-plan">—</span>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div id="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="metric-grid">
+        <div class="metric-card"><div class="metric-lbl">Imóveis</div><div class="metric-val" id="m-props">0</div><div class="metric-delta" id="m-props-d">cadastrados</div></div>
+        <div class="metric-card"><div class="metric-lbl">Leads</div><div class="metric-val" id="m-leads" style="color:var(--blue);">0</div><div class="metric-delta" id="m-leads-d">contatos</div></div>
+        <div class="metric-card"><div class="metric-lbl">Disponíveis</div><div class="metric-val" id="m-avail" style="color:var(--success);">0</div><div class="metric-delta">para anúncio</div></div>
+        <div class="metric-card"><div class="metric-lbl">Fechados</div><div class="metric-val" id="m-closed" style="color:var(--accent);">0</div><div class="metric-delta">este mês</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Imóveis Recentes</div>
+        <div id="dash-props"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Últimos Leads</div>
+        <div id="dash-leads"></div>
+      </div>
+      <div class="page-pad-bottom"></div>
+    </div>
+
+    <!-- PROPERTIES -->
+    <div class="page" id="page-properties">
+      <div class="sec-header">
+        <div><div class="sec-title">Imóveis</div><div class="sec-sub" id="props-sub">0 cadastrados</div></div>
+        <button class="btn btn-primary" onclick="openPropModal()">＋ Novo</button>
+      </div>
+      <div id="props-list"></div>
+      <div class="page-pad-bottom"></div>
+    </div>
+
+    <!-- GENERATOR -->
+    <div class="page" id="page-generator">
+      <div class="sec-header"><div><div class="sec-title">Gerar Post</div><div class="sec-sub">Legenda com IA real</div></div></div>
+      <div class="card">
+        <div class="card-title">Imóvel</div>
+        <div class="form-group" style="margin:0;">
+          <select id="gen-prop"><option value="">— selecione um imóvel —</option></select>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Plataforma</div>
+        <div class="platform-grid">
+          <div class="platform-btn sel" onclick="selPlatform(this,'instagram')"><span style="font-size:22px;">📸</span>Instagram</div>
+          <div class="platform-btn" onclick="selPlatform(this,'facebook')"><span style="font-size:22px;">👍</span>Facebook</div>
+          <div class="platform-btn" onclick="selPlatform(this,'whatsapp')"><span style="font-size:22px;">💬</span>WhatsApp</div>
+          <div class="platform-btn" onclick="selPlatform(this,'linkedin')"><span style="font-size:22px;">💼</span>LinkedIn</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Tom de Voz</div>
+        <div class="tone-grid">
+          <div class="tone-btn sel" onclick="selTone(this,'profissional')">Profissional</div>
+          <div class="tone-btn" onclick="selTone(this,'descontraído')">Descontraído</div>
+          <div class="tone-btn" onclick="selTone(this,'luxo')">Luxo</div>
+          <div class="tone-btn" onclick="selTone(this,'urgente')">Urgente</div>
+          <div class="tone-btn" onclick="selTone(this,'emocional')">Emocional</div>
+          <div class="tone-btn" onclick="selTone(this,'direto')">Direto</div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="generatePost()" id="gen-btn">⚡ Gerar com IA</button>
+      <div class="card" style="margin-top:12px;" id="gen-result-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="card-title" style="margin:0;">Legenda</div>
+          <button class="btn btn-secondary" style="padding:5px 12px;font-size:12px;" id="copy-btn" onclick="copyPost()" disabled>Copiar</button>
+        </div>
+        <div class="post-output" id="gen-output">Selecione um imóvel e clique em "Gerar com IA".</div>
+      </div>
+      <div class="page-pad-bottom"></div>
+    </div>
+
+    <!-- LEADS -->
+    <div class="page" id="page-leads">
+      <div class="sec-header">
+        <div><div class="sec-title">Leads</div><div class="sec-sub">Seus contatos</div></div>
+        <button class="btn btn-primary" onclick="openLeadModal()">＋ Novo</button>
+      </div>
+      <div class="metric-grid" style="grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;" id="lead-metrics"></div>
+      <div class="card"><div id="leads-list"></div></div>
+      <div class="page-pad-bottom"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="sec-header"><div><div class="sec-title">Configurações</div></div></div>
+      <div class="card">
+        <div class="card-title">Perfil</div>
+        <div class="form-group"><label>Nome</label><input type="text" id="cfg-name"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="cfg-email"></div>
+        <div class="form-group"><label>WhatsApp</label><input type="text" id="cfg-phone" placeholder="(00) 00000-0000"></div>
+        <div class="form-group"><label>Agência</label><input type="text" id="cfg-agency" placeholder="Nome da imobiliária"></div>
+        <button class="btn btn-primary btn-full" onclick="saveSettings()">Salvar perfil</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Redes Sociais</div>
+        <div class="form-group"><label>Instagram</label><input type="text" id="cfg-ig" placeholder="@seu_perfil"></div>
+        <div class="form-group"><label>LinkedIn</label><input type="text" id="cfg-li" placeholder="linkedin.com/in/seu-perfil"></div>
+      </div>
+      <div class="card" id="plan-card">
+        <div class="card-title">Plano</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;" id="plan-name-disp">Pro</div><div style="font-size:12px;color:var(--muted);">Ativo</div></div>
+          <span class="badge badge-orange" id="plan-badge">Pro</span>
+        </div>
+        <button class="btn btn-secondary btn-full">Gerenciar assinatura</button>
+      </div>
+      <button class="btn btn-full" onclick="logout()" style="background:rgba(239,68,68,.08);color:var(--danger);border:1px solid rgba(239,68,68,.2);margin-top:4px;">Sair da conta</button>
+      <div class="page-pad-bottom"></div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="page" id="page-admin">
+      <div class="sec-header">
+        <div><div class="sec-title">Painel Admin <span class="owner-badge">OWNER</span></div><div class="sec-sub">Visão completa do app</div></div>
+        <button class="btn btn-secondary" onclick="loadAdmin()" style="padding:7px 12px;font-size:12px;">↻</button>
+      </div>
+      <!-- admin KPIs -->
+      <div class="metric-grid" id="admin-kpis"></div>
+      <!-- admin tabs -->
+      <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px;overflow-x:auto;" id="admin-tabs">
+        <button onclick="setAdminTab('users')" class="atab active" data-tab="users" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid var(--accent);color:var(--accent);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;font-weight:600;">Usuários</button>
+        <button onclick="setAdminTab('payments')" class="atab" data-tab="payments" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Pagamentos</button>
+        <button onclick="setAdminTab('recebimento')" class="atab" data-tab="recebimento" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--warn);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">💳 Recebimento</button>
+      </div>
+      <div id="admin-tab-users"></div>
+      <div id="admin-tab-payments" style="display:none;"></div>
+      <div id="admin-tab-recebimento" style="display:none;"></div>
+      <div class="page-pad-bottom"></div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- Bottom Nav -->
+  <nav id="bottom-nav">
+    <button class="nav-tab active" id="nav-dashboard" onclick="navTo('dashboard')">
+      <div class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+      <span class="label">Início</span>
+    </button>
+    <button class="nav-tab" id="nav-properties" onclick="navTo('properties')">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <span class="label">Imóveis</span>
+    </button>
+    <button class="nav-tab" id="nav-generator" onclick="navTo('generator')">
+      <div class="icon"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+      <span class="label">Post IA</span>
+    </button>
+    <button class="nav-tab" id="nav-leads" onclick="navTo('leads')">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+      <span class="label">Leads</span>
+    </button>
+    <button class="nav-tab" id="nav-settings" onclick="navTo('settings')">
+      <div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+      <span class="label">Config</span>
+    </button>
+    <button class="nav-tab admin-tab" id="nav-admin" onclick="navTo('admin')" style="display:none;">
+      <div class="icon"><svg viewBox="0 0 24 24" style="stroke:var(--warn)!important;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <span class="label" style="color:var(--warn);">Admin</span>
+    </button>
+  </nav>
+</div>
+
+<!-- PROP MODAL -->
+<div class="modal-overlay" id="prop-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="prop-modal-title">Novo Imóvel</div>
+    <div class="form-group"><label>Fotos do Imóvel <span style="color:var(--muted);font-weight:400;">(até 10 fotos)</span></label>
+      <!-- Galeria principal -->
+      <div style="position:relative;height:140px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#141928,#1b2136);margin-bottom:8px;" id="gallery-main-box">
+        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--muted);font-size:12.5px;cursor:pointer;" id="gallery-placeholder" onclick="document.getElementById('photo-input').click()">
+          <div style="font-size:32px;">📷</div>
+          <div>Toque para adicionar fotos</div>
+        </div>
+        <img id="gallery-main-img" style="width:100%;height:100%;object-fit:cover;display:none;">
+        <!-- Navegação -->
+        <button id="gallery-prev" onclick="galleryNav(-1)" style="display:none;position:absolute;left:6px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.6);border:none;color:#fff;font-size:16px;cursor:pointer;z-index:2;">‹</button>
+        <button id="gallery-next" onclick="galleryNav(1)" style="display:none;position:absolute;right:6px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.6);border:none;color:#fff;font-size:16px;cursor:pointer;z-index:2;">›</button>
+        <!-- Contador -->
+        <div id="gallery-counter" style="display:none;position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;"></div>
+      </div>
+      <!-- Miniaturas -->
+      <div id="gallery-thumbs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
+      <!-- Botão adicionar -->
+      <button onclick="document.getElementById('photo-input').click()" style="width:100%;padding:9px;border-radius:8px;background:var(--surface2);border:1px dashed var(--border);color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">＋ Adicionar foto</button>
+      <input type="file" id="photo-input" accept="image/*" multiple style="display:none;" onchange="handlePhotos(this)">
+    </div>
+    <div class="form-group"><label>Título *</label><input type="text" id="p-titulo" placeholder="Ex: Apto 3Q – Boa Viagem"></div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Tipo</label><select id="p-tipo"><option>Apartamento</option><option>Casa</option><option>Cobertura</option><option>Sala Comercial</option><option>Kitnet</option><option>Terreno</option></select></div>
+      <div class="form-group"><label>Status</label><select id="p-status"><option>Disponível</option><option>Reservado</option><option>Vendido</option></select></div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Bairro</label><input type="text" id="p-bairro" placeholder="Boa Viagem"></div>
+      <div class="form-group"><label>Cidade</label><input type="text" id="p-cidade" value="Recife"></div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Valor (R$)</label><input type="text" id="p-valor" placeholder="450.000"></div>
+      <div class="form-group"><label>Área (m²)</label><input type="text" id="p-area" placeholder="85"></div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Quartos</label><select id="p-quartos"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5+</option></select></div>
+      <div class="form-group"><label>Vagas</label><select id="p-vagas"><option>0</option><option>1</option><option>2</option><option>3</option><option>4+</option></select></div>
+    </div>
+    <div class="form-group"><label>Descrição / Diferenciais</label><textarea id="p-desc" placeholder="Descreva os diferenciais do imóvel..."></textarea></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-secondary" style="flex:1;justify-content:center;" onclick="closePropModal()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="saveProp()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEAD MODAL -->
+<div class="modal-overlay" id="lead-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Novo Lead</div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Nome *</label><input type="text" id="l-nome" placeholder="Nome completo"></div>
+      <div class="form-group"><label>WhatsApp</label><input type="tel" id="l-tel" placeholder="(00) 00000-0000"></div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Interesse</label><input type="text" id="l-interesse" placeholder="Ex: Apto 3Q"></div>
+      <div class="form-group"><label>Origem</label><select id="l-origem"><option>Instagram</option><option>WhatsApp</option><option>Facebook</option><option>LinkedIn</option><option>Indicação</option><option>Site</option></select></div>
+    </div>
+    <div class="form-group"><label>Observações</label><textarea id="l-obs" placeholder="Detalhes..."></textarea></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-secondary" style="flex:1;justify-content:center;" onclick="closeLeadModal()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="saveLead()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIF -->
+<div id="notif"><span id="notif-dot" style="width:7px;height:7px;border-radius:50%;flex-shrink:0;"></span><span id="notif-text"></span></div>
+
+<!-- PWA INSTALL BANNER -->
+<div id="install-banner">
+  <div class="logo">IP</div>
+  <div class="text"><b>Instalar ImobPost AI</b><span>Adicione à tela inicial</span></div>
+  <div class="btns">
+    <button class="btn-install" id="install-btn">Instalar</button>
+    <button class="btn-dismiss" onclick="document.getElementById('install-banner').classList.remove('show')">✕</button>
+  </div>
+</div>
+
+<script>
+// ── STORAGE ──────────────────────────────────────────────────────────────────
+const store = {
+  get(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} },
+};
+
+// ── SEED ─────────────────────────────────────────────────────────────────────
+const SEED_PROPS = [
+  { id: "p1", titulo: "Apto 3Q – Varanda Gourmet", tipo: "Apartamento", bairro: "Boa Viagem", cidade: "Recife", valor: "650.000", area: "95", quartos: "3", vagas: "2", status: "Disponível", desc: "Apartamento com varanda gourmet, suíte com closet, vista para o mar.", foto: null },
+  { id: "p2", titulo: "Casa em Condomínio Fechado", tipo: "Casa", bairro: "Graças", cidade: "Recife", valor: "1.200.000", area: "280", quartos: "4", vagas: "4", status: "Disponível", desc: "Casa com 4 suítes, piscina privativa, área gourmet.", foto: null },
+];
+const SEED_LEADS = [
+  { id: "l1", nome: "Ana Carolina", tel: "(81) 98888-1111", interesse: "Apto · Boa Viagem", status: "Novo", origem: "Instagram", data: "24/03/2025", obs: "" },
+  { id: "l2", nome: "Ricardo Lima", tel: "(81) 97777-2222", interesse: "Casa · Graças", status: "Em contato", origem: "WhatsApp", data: "23/03/2025", obs: "" },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentUser = null;
+let props = [], leads = [];
+let editingPropId = null;
+let selPlatformVal = "instagram";
+let selToneVal = "profissional";
+let deferredInstall = null;
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+const uid = () => Math.random().toString(36).slice(2);
+const today = () => new Date().toLocaleDateString("pt-BR");
+const initials = n => n.split(" ").map(x=>x[0]).filter(Boolean).slice(0,2).join("").toUpperCase();
+const avatarGrad = s => { const h = s.charCodeAt(0)*17%360; return `linear-gradient(135deg,hsl(${h},65%,45%),hsl(${(h+50)%360},65%,55%))`; };
+const statusColor = s => ({ "Disponível":"badge-green","Reservado":"badge-orange","Vendido":"badge-gray","Novo":"badge-green","Em contato":"badge-orange","Proposta":"badge-blue","Aguardando":"badge-gray","Fechado":"badge-green" })[s]||"badge-gray";
+const isOwner = u => u?.role === "owner";
+
+function showNotif(msg, color = "#22c55e") {
+  const n = document.getElementById("notif");
+  document.getElementById("notif-text").textContent = msg;
+  document.getElementById("notif-dot").style.background = color;
+  n.classList.add("show");
+  setTimeout(() => n.classList.remove("show"), 3000);
+}
+
+// ── COMPRESS IMAGE ────────────────────────────────────────────────────────────
+function compressImage(file, cb) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 800;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      cb(canvas.toDataURL("image/jpeg", 0.80));
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── GALLERY ───────────────────────────────────────────────────────────────────
+let galleryPhotos = []; // array of base64 strings
+let galleryIndex = 0;
+
+function galleryRender() {
+  const main = document.getElementById("gallery-main-img");
+  const placeholder = document.getElementById("gallery-placeholder");
+  const prev = document.getElementById("gallery-prev");
+  const next = document.getElementById("gallery-next");
+  const counter = document.getElementById("gallery-counter");
+  const thumbsEl = document.getElementById("gallery-thumbs");
+
+  if (!galleryPhotos.length) {
+    main.style.display = "none"; placeholder.style.display = "flex";
+    prev.style.display = "none"; next.style.display = "none"; counter.style.display = "none";
+    thumbsEl.innerHTML = ""; return;
+  }
+  placeholder.style.display = "none";
+  main.style.display = "block";
+  main.src = galleryPhotos[galleryIndex];
+  prev.style.display = galleryPhotos.length > 1 ? "block" : "none";
+  next.style.display = galleryPhotos.length > 1 ? "block" : "none";
+  counter.style.display = "block";
+  counter.textContent = `${galleryIndex + 1}/${galleryPhotos.length}`;
+  thumbsEl.innerHTML = galleryPhotos.map((f, i) => `
+    <div onclick="galleryIndex=${i};galleryRender();" style="position:relative;width:52px;height:52px;border-radius:6px;overflow:hidden;cursor:pointer;border:2px solid ${i===galleryIndex?"var(--accent)":"transparent"};flex-shrink:0;">
+      <img src="${f}" style="width:100%;height:100%;object-fit:cover;">
+      <button onclick="event.stopPropagation();removePhoto(${i});" style="position:absolute;top:1px;right:1px;width:16px;height:16px;border-radius:50%;background:rgba(239,68,68,.9);border:none;color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
+    </div>`).join("");
+}
+
+function galleryNav(dir) {
+  galleryIndex = (galleryIndex + dir + galleryPhotos.length) % galleryPhotos.length;
+  galleryRender();
+}
+
+function removePhoto(idx) {
+  galleryPhotos.splice(idx, 1);
+  galleryIndex = Math.min(galleryIndex, galleryPhotos.length - 1);
+  if (galleryIndex < 0) galleryIndex = 0;
+  galleryRender();
+}
+
+function handlePhotos(input) {
+  const files = Array.from(input.files);
+  const remaining = 10 - galleryPhotos.length;
+  const toProcess = files.slice(0, remaining);
+  if (files.length > remaining) showNotif(`Máx. 10 fotos. Adicionando ${remaining}.`, "#f59e0b");
+  let done = 0;
+  toProcess.forEach(file => {
+    compressImage(file, data => {
+      galleryPhotos.push(data);
+      done++;
+      if (done === toProcess.length) { galleryIndex = 0; galleryRender(); }
+    });
+  });
+  input.value = "";
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+let authMode = "login";
+
+function showAuth() {
+  document.getElementById("landing-screen").style.display = "none";
+  document.getElementById("auth-screen").style.display = "flex";
+}
+
+function toggleAuthMode() {
+  authMode = authMode === "login" ? "signup" : "login";
+  document.getElementById("auth-sub").textContent = authMode === "login" ? "Acesse sua conta" : "Crie sua conta grátis";
+  document.getElementById("auth-btn").textContent = authMode === "login" ? "Entrar" : "Criar conta";
+  document.getElementById("auth-toggle-text").textContent = authMode === "login" ? "Não tem conta?" : "Já tem conta?";
+  document.getElementById("auth-toggle-link").textContent = authMode === "login" ? "Cadastre-se" : "Entrar";
+  document.getElementById("auth-name-group").style.display = authMode === "signup" ? "block" : "none";
+  document.getElementById("auth-err").style.display = "none";
+}
+
+function showAuthErr(msg) {
+  const el = document.getElementById("auth-err");
+  el.textContent = msg; el.style.display = "block";
+}
+
+function submitAuth() {
+  const email = document.getElementById("auth-email").value.trim();
+  const pass = document.getElementById("auth-pass").value;
+  const name = document.getElementById("auth-name").value.trim();
+  document.getElementById("auth-btn").textContent = "⏳ Aguarde...";
+
+  if (authMode === "signup") {
+    if (!name || !email || !pass) { showAuthErr("Preencha todos os campos."); document.getElementById("auth-btn").textContent = "Criar conta"; return; }
+    if (pass.length < 6) { showAuthErr("Senha mínima de 6 caracteres."); document.getElementById("auth-btn").textContent = "Criar conta"; return; }
+    if (store.get(`user:${email}`)) { showAuthErr("Email já cadastrado."); document.getElementById("auth-btn").textContent = "Criar conta"; return; }
+    const ownerId = store.get("owner_id");
+    const role = !ownerId ? "owner" : "user";
+    const plan = !ownerId ? "Owner" : "Starter";
+    const user = { id: uid(), name, email, plan, role, blocked: false, createdAt: today() };
+    store.set(`user:${email}`, { ...user, pass });
+    if (!ownerId) store.set("owner_id", user.id);
+    const allEmails = store.get("all_users") || [];
+    store.set("all_users", [...allEmails, email]);
+    store.set("session", user);
+    store.set(`props:${user.id}`, SEED_PROPS);
+    store.set(`leads:${user.id}`, SEED_LEADS);
+    bootApp(user);
+  } else {
+    if (!email || !pass) { showAuthErr("Informe email e senha."); document.getElementById("auth-btn").textContent = "Entrar"; return; }
+    const stored = store.get(`user:${email}`);
+    if (!stored || stored.pass !== pass) { showAuthErr("Email ou senha incorretos."); document.getElementById("auth-btn").textContent = "Entrar"; return; }
+    if (stored.blocked) { showAuthErr("Conta suspensa. Contate o suporte."); document.getElementById("auth-btn").textContent = "Entrar"; return; }
+    const user = { id: stored.id, name: stored.name, email: stored.email, plan: stored.plan, role: stored.role };
+    store.set("session", user);
+    bootApp(user);
+  }
+}
+
+// ── BOOT ─────────────────────────────────────────────────────────────────────
+function bootApp(user) {
+  currentUser = user;
+  props = store.get(`props:${user.id}`) || [];
+  leads = store.get(`leads:${user.id}`) || [];
+  document.getElementById("auth-screen").style.display = "none";
+  document.getElementById("landing-screen").style.display = "none";
+  document.getElementById("app").style.display = "flex";
+  document.getElementById("user-av").textContent = initials(user.name);
+  document.getElementById("user-plan").textContent = isOwner(user) ? "👑 Owner" : user.plan;
+  if (isOwner(user)) document.getElementById("nav-admin").style.display = "flex";
+  document.getElementById("cfg-name").value = user.name;
+  document.getElementById("cfg-email").value = user.email;
+  document.getElementById("plan-name-disp").textContent = user.plan;
+  document.getElementById("plan-badge").textContent = user.plan;
+  populateGenSelect();
+  renderDashboard();
+  navTo("dashboard");
+}
+
+function logout() {
+  store.del("session");
+  currentUser = null;
+  document.getElementById("app").style.display = "none";
+  document.getElementById("landing-screen").style.display = "block";
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+const PAGE_TITLES = { dashboard:"Dashboard", properties:"Imóveis", generator:"Gerar Post", leads:"Leads", settings:"Configurações", admin:"⚙️ Admin" };
+function navTo(page) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-tab").forEach(b => b.classList.remove("active"));
+  document.getElementById("page-" + page).classList.add("active");
+  const navBtn = document.getElementById("nav-" + page);
+  if (navBtn) navBtn.classList.add("active");
+  document.getElementById("topbar-title").textContent = PAGE_TITLES[page] || page;
+  if (page === "properties") renderProps();
+  if (page === "leads") renderLeads();
+  if (page === "generator") populateGenSelect();
+  if (page === "admin") loadAdmin();
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const avail = props.filter(p => p.status === "Disponível").length;
+  const newL = leads.filter(l => l.status === "Novo").length;
+  const closed = leads.filter(l => l.status === "Fechado").length;
+  document.getElementById("m-props").textContent = props.length;
+  document.getElementById("m-leads").textContent = leads.length;
+  document.getElementById("m-avail").textContent = avail;
+  document.getElementById("m-closed").textContent = closed;
+  document.getElementById("m-props-d").textContent = `${avail} disponíveis`;
+  document.getElementById("m-leads-d").textContent = `${newL} novos`;
+
+  const dp = document.getElementById("dash-props");
+  dp.innerHTML = props.slice(0,3).map(p => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+      <div style="width:36px;height:36px;border-radius:8px;background:${p.foto?"transparent":"linear-gradient(135deg,#141928,#1b2136)"};overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;">
+        ${p.foto ? `<img src="${p.foto}" style="width:100%;height:100%;object-fit:cover;">` : "🏠"}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.titulo}</div>
+        <div style="font-size:11.5px;color:var(--muted);">${p.bairro} · R$ ${p.valor}</div>
+      </div>
+      <span class="badge ${statusColor(p.status)}">${p.status}</span>
+    </div>`).join("") || `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">Nenhum imóvel ainda</div>`;
+
+  const dl = document.getElementById("dash-leads");
+  dl.innerHTML = leads.slice(0,3).map(l => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+      <div class="av" style="background:${avatarGrad(l.nome)};">${initials(l.nome)}</div>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:500;">${l.nome}</div><div style="font-size:11.5px;color:var(--muted);">${l.interesse}</div></div>
+      <span class="badge ${statusColor(l.status)}">${l.status}</span>
+    </div>`).join("") || `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">Nenhum lead ainda</div>`;
+}
+
+// ── PROPERTIES ────────────────────────────────────────────────────────────────
+function renderProps() {
+  document.getElementById("props-sub").textContent = `${props.length} cadastrado(s)`;
+  document.getElementById("props-list").innerHTML = props.map(p => {
+    const fotos = p.fotos && p.fotos.length ? p.fotos : (p.foto ? [p.foto] : []);
+    const fotoCount = fotos.length;
+    const mainFoto = fotos[0] || null;
+    return `
+    <div class="prop-card" id="pcard-${p.id}">
+      <div class="prop-img" style="position:relative;background:${mainFoto?"transparent":"linear-gradient(135deg,#141928,#1b2136)"};">
+        ${mainFoto ? `
+          <img id="pimg-${p.id}" src="${mainFoto}" style="width:100%;height:100%;object-fit:cover;">
+          ${fotoCount > 1 ? `
+            <button onclick="propImgNav('${p.id}',-1,${JSON.stringify(fotos).replace(/"/g,'&quot;')})" style="position:absolute;left:6px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.6);border:none;color:#fff;font-size:14px;cursor:pointer;">‹</button>
+            <button onclick="propImgNav('${p.id}',1,${JSON.stringify(fotos).replace(/"/g,'&quot;')})" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.6);border:none;color:#fff;font-size:14px;cursor:pointer;">›</button>
+            <div id="pidx-${p.id}" style="position:absolute;bottom:5px;right:7px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;">1/${fotoCount}</div>
+          ` : ""}
+        ` : `<div style="text-align:center;color:var(--muted);font-size:12px;"><div style="font-size:28px;margin-bottom:4px;">📷</div>Sem foto</div>`}
+      </div>
+      <div class="prop-body">
+        <div class="prop-title">${p.titulo}</div>
+        <div class="prop-sub">${p.tipo} · ${p.bairro}, ${p.cidade}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">🛏 ${p.quartos}q &nbsp;·&nbsp; 📐 ${p.area}m² &nbsp;·&nbsp; 🚗 ${p.vagas||0} vaga(s)${fotoCount>1?` &nbsp;·&nbsp; 📷 ${fotoCount} fotos`:""}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="prop-price">R$ ${p.valor}</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="badge ${statusColor(p.status)}">${p.status}</span>
+            <button onclick="openPropModal('${p.id}')" style="width:28px;height:28px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">✏️</button>
+            <button onclick="deleteProp('${p.id}')" style="width:28px;height:28px;border-radius:6px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);color:var(--danger);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">🗑</button>
+          </div>
+        </div>
+      </div>
+    </div>`}).join("") || `<div style="text-align:center;padding:40px;color:var(--muted);"><div style="font-size:36px;margin-bottom:10px;">🏠</div><div style="font-size:13px;">Nenhum imóvel cadastrado</div></div>`;
+}
+
+// Navegação de fotos nos cards
+const propImgIdxMap = {};
+function propImgNav(id, dir, fotos) {
+  if (!propImgIdxMap[id]) propImgIdxMap[id] = 0;
+  propImgIdxMap[id] = (propImgIdxMap[id] + dir + fotos.length) % fotos.length;
+  const img = document.getElementById(`pimg-${id}`);
+  const idx = document.getElementById(`pidx-${id}`);
+  if (img) img.src = fotos[propImgIdxMap[id]];
+  if (idx) idx.textContent = `${propImgIdxMap[id]+1}/${fotos.length}`;
+}
+
+function openPropModal(id) {
+  editingPropId = id || null;
+  document.getElementById("prop-modal-title").textContent = id ? "Editar Imóvel" : "Novo Imóvel";
+  const p = id ? props.find(x => x.id === id) : null;
+  ["titulo","tipo","bairro","cidade","valor","area","quartos","vagas","status","desc"].forEach(f => {
+    const el = document.getElementById("p-" + f);
+    if (el) el.value = p ? (p[f] || "") : (f === "cidade" ? "Recife" : f === "quartos" ? "3" : f === "vagas" ? "2" : f === "status" ? "Disponível" : "");
+  });
+  // Carregar galeria de fotos
+  galleryPhotos = p?.fotos ? [...p.fotos] : (p?.foto ? [p.foto] : []);
+  galleryIndex = 0;
+  galleryRender();
+  document.getElementById("prop-modal").classList.add("open");
+}
+function closePropModal() { document.getElementById("prop-modal").classList.remove("open"); }
+
+function saveProp() {
+  const titulo = document.getElementById("p-titulo").value.trim();
+  if (!titulo) { showNotif("Informe o título", "#f59e0b"); return; }
+  const data = {
+    titulo, tipo: document.getElementById("p-tipo").value,
+    bairro: document.getElementById("p-bairro").value,
+    cidade: document.getElementById("p-cidade").value,
+    valor: document.getElementById("p-valor").value,
+    area: document.getElementById("p-area").value,
+    quartos: document.getElementById("p-quartos").value,
+    vagas: document.getElementById("p-vagas").value,
+    status: document.getElementById("p-status").value,
+    desc: document.getElementById("p-desc").value,
+    fotos: [...galleryPhotos],
+    foto: galleryPhotos[0] || null  // compatibilidade com dashboard
+  };
+  if (editingPropId) { props = props.map(p => p.id === editingPropId ? { ...p, ...data } : p); showNotif("Imóvel atualizado! ✓"); }
+  else { props.push({ ...data, id: uid() }); showNotif("Imóvel cadastrado! ✓"); }
+  store.set(`props:${currentUser.id}`, props);
+  closePropModal(); renderProps(); renderDashboard(); populateGenSelect();
+}
+
+function deleteProp(id) {
+  if (!confirm("Excluir este imóvel?")) return;
+  props = props.filter(p => p.id !== id);
+  store.set(`props:${currentUser.id}`, props);
+  renderProps(); renderDashboard(); populateGenSelect();
+  showNotif("Imóvel removido", "#ef4444");
+}
+
+// ── GENERATOR ─────────────────────────────────────────────────────────────────
+function populateGenSelect() {
+  const sel = document.getElementById("gen-prop");
+  sel.innerHTML = `<option value="">— selecione um imóvel —</option>` + props.map(p => `<option value="${p.id}">${p.titulo} – ${p.bairro}</option>`).join("");
+}
+function selPlatform(el, val) { document.querySelectorAll(".platform-btn").forEach(b => b.classList.remove("sel")); el.classList.add("sel"); selPlatformVal = val; }
+function selTone(el, val) { document.querySelectorAll(".tone-btn").forEach(b => b.classList.remove("sel")); el.classList.add("sel"); selToneVal = val; }
+
+async function generatePost() {
+  const selId = document.getElementById("gen-prop").value;
+  if (!selId) { showNotif("Selecione um imóvel", "#f59e0b"); return; }
+  const p = props.find(x => x.id === selId);
+  const out = document.getElementById("gen-output");
+  out.innerHTML = `<div class="loading-dots"><span></span><span></span><span></span></div>`;
+  out.className = "post-output";
+  document.getElementById("copy-btn").disabled = true;
+  document.getElementById("gen-btn").textContent = "⏳ Gerando...";
+  document.getElementById("gen-btn").disabled = true;
+
+  const prompt = `Você é especialista em marketing imobiliário. Crie uma legenda para ${selPlatformVal} com tom ${selToneVal}:\n\nTipo: ${p.tipo}\nTítulo: ${p.titulo}\nLocalização: ${p.bairro}, ${p.cidade}\nValor: R$ ${p.valor}\nÁrea: ${p.area}m²\nQuartos: ${p.quartos}\nDescrição: ${p.desc}\n\nRegras: adapte ao ${selPlatformVal}, tom ${selToneVal}, use emojis, hashtags se Instagram/Facebook, máx 250 palavras. Apenas a legenda pronta.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 800, messages: [{ role: "user", content: prompt }] })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || "Erro ao gerar.";
+    out.textContent = text;
+    out.className = "post-output filled";
+    document.getElementById("copy-btn").disabled = false;
+    showNotif("Post gerado! ✨");
+  } catch { out.textContent = "Erro de conexão. Verifique sua internet."; }
+  document.getElementById("gen-btn").textContent = "⚡ Gerar com IA";
+  document.getElementById("gen-btn").disabled = false;
+}
+
+function copyPost() {
+  const text = document.getElementById("gen-output").textContent;
+  navigator.clipboard.writeText(text).then(() => showNotif("Copiado! 📋", "#3b82f6"));
+}
+
+// ── LEADS ─────────────────────────────────────────────────────────────────────
+function renderLeads() {
+  const counts = { Novo: 0, Negociação: 0, Fechado: 0 };
+  leads.forEach(l => { if (l.status === "Novo") counts.Novo++; else if (["Em contato","Proposta","Aguardando"].includes(l.status)) counts.Negociação++; else if (l.status === "Fechado") counts.Fechado++; });
+  document.getElementById("lead-metrics").innerHTML = [
+    { l:"Total", v:leads.length, c:"var(--text)" },
+    { l:"Novos", v:counts.Novo, c:"var(--success)" },
+    { l:"Negociação", v:counts.Negociação, c:"var(--blue)" },
+    { l:"Fechados", v:counts.Fechado, c:"var(--accent)" },
+  ].map(m => `<div class="metric-card"><div class="metric-lbl">${m.l}</div><div class="metric-val" style="color:${m.c};font-size:22px;">${m.v}</div></div>`).join("");
+
+  document.getElementById("leads-list").innerHTML = leads.map(l => `
+    <div class="lead-item">
+      <div class="av" style="background:${avatarGrad(l.nome)};">${initials(l.nome)}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:500;">${l.nome}</div>
+        <div style="font-size:11.5px;color:var(--muted);">${l.tel} · ${l.origem}</div>
+        <div style="font-size:12px;color:var(--muted);">${l.interesse}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <span class="badge ${statusColor(l.status)}">${l.status}</span>
+        <button onclick="deleteLead('${l.id}')" style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);color:var(--danger);border-radius:5px;width:22px;height:22px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;">✕</button>
+      </div>
+    </div>`).join("") || `<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">Nenhum lead cadastrado</div>`;
+}
+
+function openLeadModal() { document.getElementById("lead-modal").classList.add("open"); }
+function closeLeadModal() { document.getElementById("lead-modal").classList.remove("open"); }
+
+function saveLead() {
+  const nome = document.getElementById("l-nome").value.trim();
+  if (!nome) { showNotif("Informe o nome", "#f59e0b"); return; }
+  leads.push({ id: uid(), nome, tel: document.getElementById("l-tel").value, interesse: document.getElementById("l-interesse").value, status: "Novo", origem: document.getElementById("l-origem").value, data: today(), obs: document.getElementById("l-obs").value });
+  store.set(`leads:${currentUser.id}`, leads);
+  closeLeadModal(); renderLeads(); renderDashboard();
+  showNotif("Lead cadastrado! ✓");
+  ["l-nome","l-tel","l-interesse","l-obs"].forEach(id => document.getElementById(id).value = "");
+}
+
+function deleteLead(id) {
+  if (!confirm("Remover lead?")) return;
+  leads = leads.filter(l => l.id !== id);
+  store.set(`leads:${currentUser.id}`, leads);
+  renderLeads(); renderDashboard();
+  showNotif("Lead removido", "#ef4444");
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────────────────────
+function saveSettings() {
+  const updated = { ...currentUser, name: document.getElementById("cfg-name").value };
+  store.set("session", updated);
+  store.set(`user:${updated.email}`, { ...store.get(`user:${updated.email}`), name: updated.name });
+  currentUser = updated;
+  document.getElementById("user-av").textContent = initials(updated.name);
+  showNotif("Configurações salvas!");
+}
+
+// ── ADMIN ─────────────────────────────────────────────────────────────────────
+function setAdminTab(tab) {
+  ["users","payments","recebimento"].forEach(t => {
+    document.getElementById(`admin-tab-${t}`).style.display = t === tab ? "block" : "none";
+    document.querySelectorAll(".atab").forEach(b => {
+      if (b.dataset.tab === tab) { b.style.borderBottomColor = tab === "recebimento" ? "var(--warn)" : "var(--accent)"; b.style.color = tab === "recebimento" ? "var(--warn)" : "var(--accent)"; b.style.fontWeight = "600"; }
+      else { b.style.borderBottomColor = "transparent"; b.style.color = b.dataset.tab === "recebimento" ? "var(--warn)" : "var(--muted)"; b.style.fontWeight = "400"; }
+    });
+  });
+}
+
+function loadAdmin() {
+  if (!isOwner(currentUser)) return;
+  const emails = store.get("all_users") || [];
+  const allUsers = emails.map(e => store.get(`user:${e}`)).filter(Boolean);
+  const payments = store.get("payments") || [];
+
+  // KPIs
+  const totalMRR = payments.filter(p => p.status === "Pago").reduce((s,p) => s + Number(p.valor||0), 0);
+  document.getElementById("admin-kpis").innerHTML = [
+    { l:"Usuários", v:allUsers.length, c:"var(--text)", i:"👥" },
+    { l:"MRR Recebido", v:`R$ ${totalMRR}`, c:"var(--success)", i:"💰" },
+    { l:"Pgtos Pendentes", v:payments.filter(p=>p.status==="Pendente").length, c:"var(--warn)", i:"⏳" },
+    { l:"Bloqueados", v:allUsers.filter(u=>u.blocked).length, c:"var(--danger)", i:"🔒" },
+  ].map(m => `<div class="metric-card"><div style="font-size:18px;margin-bottom:5px;">${m.i}</div><div class="metric-lbl">${m.l}</div><div class="metric-val" style="color:${m.c};font-size:20px;">${m.v}</div></div>`).join("");
+
+  // Users tab
+  document.getElementById("admin-tab-users").innerHTML = `
+    <div class="card">
+      ${allUsers.map(u => `
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04);opacity:${u.blocked?.5:1}">
+          <div class="av" style="background:${u.role==="owner"?"linear-gradient(135deg,#f59e0b,#fbbf24)":avatarGrad(u.name)};width:34px;height:34px;font-size:11px;">${initials(u.name)}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:500;">${u.name} ${u.role==="owner"?'<span class="owner-badge">OWNER</span>':""}</div>
+            <div style="font-size:11.5px;color:var(--muted);">${u.email}</div>
+            <div style="font-size:11.5px;color:var(--muted);">Plano: ${u.plan} · ${u.blocked?"🔒 Bloqueado":"✓ Ativo"}</div>
+          </div>
+          ${u.role !== "owner" ? `
+            <div style="display:flex;flex-direction:column;gap:5px;">
+              <button onclick="adminBlock('${u.email}')" style="padding:4px 10px;border-radius:6px;background:${u.blocked?"rgba(34,197,94,.08)":"rgba(239,68,68,.08)"};border:1px solid ${u.blocked?"rgba(34,197,94,.2)":"rgba(239,68,68,.2)"};color:${u.blocked?"var(--success)":"var(--danger)"};font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">${u.blocked?"Desbloquear":"Bloquear"}</button>
+            </div>` : ""}
+        </div>`).join("")}
+    </div>`;
+
+  // Payments tab
+  document.getElementById("admin-tab-payments").innerHTML = `
+    <div class="card">
+      ${payments.length ? payments.map(p => `
+        <div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+          <div style="flex:1;"><div style="font-size:13px;font-weight:500;">${p.userName||p.user||"—"}</div><div style="font-size:11.5px;color:var(--muted);">${p.plan} · ${p.metodo||"—"} · ${p.data}</div></div>
+          <div style="text-align:right;"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:${p.status==="Pago"?"var(--success)":p.status==="Pendente"?"var(--warn)":"var(--danger)"};">R$ ${p.valor}</div><span class="badge ${p.status==="Pago"?"badge-green":p.status==="Pendente"?"badge-orange":"badge-gray"}">${p.status}</span></div>
+        </div>`).join("") : `<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">Nenhum pagamento registrado</div>`}
+    </div>`;
+
+  // Recebimento tab
+  const cfg = store.get("pay_config") || {};
+  document.getElementById("admin-tab-recebimento").innerHTML = `
+    <div class="card" style="border-color:rgba(59,130,246,.2);">
+      <div style="font-size:13px;color:#60a5fa;line-height:1.6;">💡 Ative os métodos de recebimento e preencha seus dados. Serão exibidos aos assinantes no momento do pagamento.</div>
+    </div>
+    ${renderPayMethod("pix","⚡","Pix","0% de taxa · instantâneo",cfg)}
+    ${renderPayMethod("banco","🏦","Transferência Bancária","TED/DOC · 1 dia útil",cfg)}
+    ${renderPayMethod("mp","🛒","Mercado Pago","Cartão, Pix e boleto",cfg)}
+    ${renderPayMethod("ps","💳","PagSeguro","Cartão, Pix e boleto",cfg)}
+    ${renderPayMethod("pp","🌐","PayPal","Pagamentos internacionais",cfg)}
+    <button class="btn btn-primary btn-full" onclick="savePayConfig()" style="margin-top:4px;">💾 Salvar configurações</button>`;
+
+  setAdminTab("users");
+}
+
+function renderPayMethod(id, icon, title, subtitle, cfg) {
+  const active = cfg[`${id}_ativo`];
+  const fields = {
+    pix: `<div class="form-group"><label>Tipo de chave</label><select id="pay-${id}-tipo" onchange="togglePayFields()"><option value="">Selecione...</option><option ${cfg.pix_tipo==="CPF/CNPJ"?"selected":""}>CPF/CNPJ</option><option ${cfg.pix_tipo==="Email"?"selected":""}>Email</option><option ${cfg.pix_tipo==="Telefone"?"selected":""}>Telefone</option><option ${cfg.pix_tipo==="Chave aleatória"?"selected":""}>Chave aleatória</option></select></div><div class="form-group"><label>Chave Pix</label><input type="text" id="pay-${id}-chave" placeholder="Sua chave pix" value="${cfg.pix_chave||""}"></div><div class="form-row-2"><div class="form-group"><label>Titular</label><input type="text" id="pay-${id}-nome" value="${cfg.pix_nome||""}" placeholder="Nome completo"></div><div class="form-group"><label>Banco</label><input type="text" id="pay-${id}-banco" value="${cfg.pix_banco||""}" placeholder="Ex: Nubank"></div></div>`,
+    banco: `<div class="form-row-2"><div class="form-group"><label>Banco</label><input type="text" id="pay-${id}-banco" value="${cfg.banco_banco||""}" placeholder="Bradesco, Itaú..."></div><div class="form-group"><label>Tipo</label><select id="pay-${id}-tipo"><option ${cfg.banco_tipo==="Corrente"?"selected":""}>Corrente</option><option ${cfg.banco_tipo==="Poupança"?"selected":""}>Poupança</option></select></div></div><div class="form-row-2"><div class="form-group"><label>Agência</label><input type="text" id="pay-${id}-ag" value="${cfg.banco_agencia||""}" placeholder="0000"></div><div class="form-group"><label>Conta</label><input type="text" id="pay-${id}-conta" value="${cfg.banco_conta||""}" placeholder="00000-0"></div></div><div class="form-row-2"><div class="form-group"><label>Titular</label><input type="text" id="pay-${id}-tit" value="${cfg.banco_titular||""}"></div><div class="form-group"><label>CPF/CNPJ</label><input type="text" id="pay-${id}-cpf" value="${cfg.banco_cpf||""}"></div></div>`,
+    mp: `<div class="form-group"><label>Email Mercado Pago</label><input type="email" id="pay-${id}-email" value="${cfg.mp_email||""}" placeholder="seu@mercadopago.com"></div><div class="form-group"><label>Access Token (opcional)</label><input type="text" id="pay-${id}-token" value="${cfg.mp_token||""}" placeholder="APP_USR-..."></div>`,
+    ps: `<div class="form-group"><label>Email PagSeguro</label><input type="email" id="pay-${id}-email" value="${cfg.ps_email||""}" placeholder="seu@pagseguro.com"></div><div class="form-group"><label>Token da API (opcional)</label><input type="text" id="pay-${id}-token" value="${cfg.ps_token||""}"></div>`,
+    pp: `<div class="form-group"><label>Email PayPal</label><input type="email" id="pay-${id}-email" value="${cfg.pp_email||""}" placeholder="seu@paypal.com"></div>`,
+  };
+  return `
+    <div class="card" style="border-color:${active?"rgba(34,197,94,.2)":""};margin-bottom:10px;" id="paycard-${id}">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:38px;height:38px;border-radius:10px;background:${active?"rgba(34,197,94,.1)":"var(--surface2)"};display:flex;align-items:center;justify-content:center;font-size:20px;">${icon}</div>
+          <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">${title}</div><div style="font-size:11.5px;color:var(--muted);">${subtitle}</div></div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="pay-${id}-ativo" ${active?"checked":""} onchange="togglePayCard('${id}')"><span class="toggle-slider"></span></label>
+      </div>
+      <div id="payfields-${id}" style="margin-top:${active?16:0}px;padding-top:${active?12:0}px;border-top:${active?"1px solid var(--border)":"none"};display:${active?"block":"none"};">${fields[id]||""}</div>
+    </div>`;
+}
+
+function togglePayCard(id) {
+  const active = document.getElementById(`pay-${id}-ativo`).checked;
+  const fields = document.getElementById(`payfields-${id}`);
+  const card = document.getElementById(`paycard-${id}`);
+  fields.style.display = active ? "block" : "none";
+  fields.style.marginTop = active ? "16px" : "0";
+  fields.style.paddingTop = active ? "12px" : "0";
+  fields.style.borderTop = active ? "1px solid var(--border)" : "none";
+  card.style.borderColor = active ? "rgba(34,197,94,.2)" : "";
+}
+
+function savePayConfig() {
+  const g = id => { const el = document.getElementById(id); return el ? el.value : ""; };
+  const cfg = {
+    pix_ativo: document.getElementById("pay-pix-ativo")?.checked || false,
+    pix_tipo: g("pay-pix-tipo"), pix_chave: g("pay-pix-chave"), pix_nome: g("pay-pix-nome"), pix_banco: g("pay-pix-banco"),
+    banco_ativo: document.getElementById("pay-banco-ativo")?.checked || false,
+    banco_banco: g("pay-banco-banco"), banco_tipo: g("pay-banco-tipo"), banco_agencia: g("pay-banco-ag"), banco_conta: g("pay-banco-conta"), banco_titular: g("pay-banco-tit"), banco_cpf: g("pay-banco-cpf"),
+    mp_ativo: document.getElementById("pay-mp-ativo")?.checked || false,
+    mp_email: g("pay-mp-email"), mp_token: g("pay-mp-token"),
+    ps_ativo: document.getElementById("pay-ps-ativo")?.checked || false,
+    ps_email: g("pay-ps-email"), ps_token: g("pay-ps-token"),
+    pp_ativo: document.getElementById("pay-pp-ativo")?.checked || false,
+    pp_email: g("pay-pp-email"),
+  };
+  store.set("pay_config", cfg);
+  showNotif("Recebimento salvo! 💾");
+}
+
+function adminBlock(email) {
+  const u = store.get(`user:${email}`);
+  if (!u) return;
+  u.blocked = !u.blocked;
+  store.set(`user:${email}`, u);
+  showNotif(u.blocked ? `${u.name} bloqueado` : `${u.name} desbloqueado`, u.blocked ? "#ef4444" : "#22c55e");
+  loadAdmin();
+}
+
+// ── PWA INSTALL ───────────────────────────────────────────────────────────────
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredInstall = e;
+  setTimeout(() => document.getElementById("install-banner").classList.add("show"), 2000);
+});
+document.getElementById("install-btn").addEventListener("click", () => {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  deferredInstall.userChoice.then(() => {
+    deferredInstall = null;
+    document.getElementById("install-banner").classList.remove("show");
+  });
+});
+window.addEventListener("appinstalled", () => {
+  document.getElementById("install-banner").classList.remove("show");
+  showNotif("App instalado com sucesso! 🎉");
+});
+
+// ── OFFLINE DETECTION ─────────────────────────────────────────────────────────
+window.addEventListener("online", () => document.getElementById("offline-badge").classList.remove("show"));
+window.addEventListener("offline", () => document.getElementById("offline-badge").classList.add("show"));
+
+// ── SERVICE WORKER ────────────────────────────────────────────────────────────
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+
+// ── BOOT ─────────────────────────────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    document.getElementById("loading").style.display = "none";
+    const session = store.get("session");
+    if (session) {
+      bootApp(session);
+    } else {
+      document.getElementById("landing-screen").style.display = "block";
+    }
+  }, 800);
+});
+</script>
+</body>
+</html>
